@@ -3,19 +3,19 @@
 #include <QDebug>
 
 #include "server.h"
+#include "room.h"
 
-Server::Server(QObject *parent)
+Server::Server(Room* room, QObject* parent)
 {
+    m_room = room;
     initServer();
     connect(tcpServer, &QTcpServer::newConnection, this, &Server::newUser);
-
 }
 
 Server::~Server()
 {
     tcpServer->close();
     for (auto& x : users) {
-        x->close();
         x->deleteLater();
     }
     tcpServer->deleteLater();
@@ -28,32 +28,33 @@ void Server::initServer()
     if (!tcpServer->listen(address, 7890)) {
         return;
     }
+    qDebug() << "server started";
 }
 
 void Server::newUser()
 {
     qDebug() << Q_FUNC_INFO;
-    QTcpSocket *clientConnection = tcpServer->nextPendingConnection();
-    connect(clientConnection, &QTcpSocket::readyRead, this, &Server::readMessage);
-    users.append(clientConnection);
+    QTcpSocket* clientConnection = tcpServer->nextPendingConnection();
+
+    User* user = new User();
+
+    user->setSocket(clientConnection);
+    users.append(user);
+
+    Player* player = static_cast<Player*>(user);
+    m_room->setPlayer(player);
+
+    connect(user, &User::onUserConnectionLost, this, &Server::onConnectionLost);
+
+    emit user->onUserConnected();
 }
 
-void Server::readMessage()
+void Server::onConnectionLost(User* user)
 {
-    qDebug() << Q_FUNC_INFO;
-    QTcpSocket* client = static_cast<QTcpSocket*>(sender());
-    if (client->bytesAvailable() > 0) {
-        int size = client->bytesAvailable();
-        char buffer[100];
-        client->read(&buffer[0], size);
-        buffer[size] = '\0';
-        for (int i = 0; i < size; i++) {
-           qDebug()  << buffer[i];
-        }
+    int usersRemoved = users.removeAll(user);
+    if (usersRemoved > 1 || usersRemoved == 0) {
+        qDebug() << "faild to disconnect user";
     }
-}
-
-void Server::onDisconnect()
-{
 
 }
+
