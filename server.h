@@ -1,32 +1,26 @@
 #ifndef SERVER_H
 #define SERVER_H
 
-#include <QString>
-#include <QVector>
-#include <QObject>
 #include <QTcpServer>
+#include <QTcpSocket>
+#include <QList>
+#include <QObject>
+#include <QByteArray>
 
-#include "user.h"
-#include "room.h"
-
-class Server : public QObject
+class Server : public QTcpServer
 {
     Q_OBJECT
-
 public:
-    explicit Server(Room* room, QObject *parent = nullptr);
-
+    //TODO make singleton
+    Server(QHostAddress address, int port = 0);
     ~Server();
 
-private slots:
-    void newUser();
-    void onConnectionLost(User*);
+protected:
+    void incomingConnection(qintptr handle) override;
 
 private:
-    void initServer();
+    void handleData(const QByteArray&);
 
-    QTcpServer* tcpServer = nullptr;
-    QVector<User*> users;
-    Room* m_room = nullptr;
+    QList<QTcpSocket*> m_pendingConnections;
 };
-#endif
+#endif // SERVER_H

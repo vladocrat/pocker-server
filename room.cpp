@@ -27,7 +27,6 @@ void Room::addToTable(Card card)
     m_table.append(card);
 }
 
-
 void Room::setPlayer(Player* player)
 {
     qDebug() << Q_FUNC_INFO;

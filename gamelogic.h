@@ -14,11 +14,9 @@ public:
 
     QVector<Card> setInitialTable();
     void setInitialHand(Player* player);
-
+    void printDeck() const;
     //TODO
     //add one card to the table
-
-    void printDeck() const;
 
 public slots:
     void bet(int);

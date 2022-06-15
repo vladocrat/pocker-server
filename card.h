@@ -13,6 +13,7 @@ public:
         CLUBS,
         SPADES
     };
+    Q_ENUM(Suit);
 
     enum Value {
         TWO = 2,
@@ -30,21 +31,17 @@ public:
         ACE
     };
     Q_ENUM(Value);
-    Q_ENUM(Suit);
 
 public:
     Card();
     Card(const Card&);
-
     Card& operator=(const Card&);
 
-    const Suit& suit() const;
-    void setSuit(const Suit&);
-
-    const Value& value() const;
-    void setValue(const Value&);
-
     const QString toString() const;
+    const Suit& suit() const;
+    const Value& value() const;
+    void setSuit(const Suit&);
+    void setValue(const Value&);
 
 private:
     template<class T>

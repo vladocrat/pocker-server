@@ -105,6 +105,7 @@ void User::writeMessage(int command, int money)
 void User::onSocketDisconnected()
 {
     m_socket->close();
+    //TODO Dont need to delete socket, deleted automatically
     m_socket->deleteLater();
     emit onUserConnectionLost(this);
 }
@@ -115,6 +116,7 @@ void User::handleData(const QByteArray& arr)
     QDataStream stream(arr);
     int command = 0;
     stream >> command;
+
     switch (command) {
     case CL_BET: {
         int playersBet = 0;
@@ -143,6 +145,12 @@ void User::handleData(const QByteArray& arr)
     }
     case CL_CHECK: {
         emit check();
+        break;
+    }
+    case CL_ROOM_CHOICE: {
+        int room = 0;
+        stream >> room;
+        emit roomChosen(room);
         break;
     }
     }

@@ -8,7 +8,7 @@ int main(int argc, char *argv[])
 {
     QCoreApplication app(argc, argv);
     Room room;
-    Server server(&room); // is this a correct way? pepega
+    Server server(QHostAddress("127.0.0.1"), 7890);
     GameLogic logic;
     return app.exec();
 }

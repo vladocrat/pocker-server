@@ -14,12 +14,10 @@ public:
     Room();
     const int bet() const;
     const int bank() const;
-
     void addToTable(Card);
 
 public slots:
     void setPlayer(Player*);
-
     void notifyBet(Player*);
     void notifyRaise(Player*, int bet);
     void notifyAllIn(Player*, int playersMoney);
@@ -43,7 +41,8 @@ private:
     QVector<Player*> m_players;
     QVector<Card> m_table;
     GameLogic* m_logic = nullptr;
-    int m_bet = 0; //the bet that is currently in the game/round.
+    //the bet that is currently in the game/round.
+    int m_bet = 0;
     int m_bank = 0;
 };
 

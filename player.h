@@ -16,14 +16,11 @@ public:
     ~Player();
 
     const QVector<Card> hand() const;
-    void setHand(QVector<Card>);
-
     const int bet() const;
-    void setBet(int bet);
-
     const int money() const;
+    void setHand(QVector<Card>);
+    void setBet(int bet);
     void setMoney(int money);
-
     const QString toString() const;
 
 private:

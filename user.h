@@ -10,11 +10,10 @@ class User : public QObject
     Q_OBJECT
 public:
     User(const QString& login = "default");
-
     ~User();
+
     QTcpSocket* socket() const;
     QString login() const;
-
     void setSocket(QTcpSocket*);
 
 public slots:
@@ -25,23 +24,22 @@ private slots:
     void writeMessage(int command, int money = -1);
     void onSocketDisconnected();
 
-
 signals:
     void onUserConnectionLost(User*);
     void onUserConnected();
-
     void bet(int);
     void fold();
     void raise(int);
     void allIn();
     void call();
     void check();
-
+    void roomChosen(int);
 
 private:
     void handleData(const QByteArray&);
 
-    QTcpSocket* m_socket = nullptr;  // coz socket is null ptr (need to initialize) we are not able to connect? or some shit
+    //coz socket is null ptr (need to initialize) we are not able to connect? or some shit
+    QTcpSocket* m_socket = nullptr;
     QString m_login = "";
     int m_packageSize = -1;
 };
