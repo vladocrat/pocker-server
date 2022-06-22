@@ -11,16 +11,22 @@
 #include "RegisterData.h"
 #include "userrepository.h"
 #include "usercontroller.h"
+#include "Message.h"
 
 namespace Internal
 {
+
 LoginData readClientData(QDataStream& stream)
 {
     QString login;
     QString password;
     stream >> login;
     stream >> password;
-    return LoginData {login, password};
+    LoginData data;
+    data.login = login;
+    data.password = password;
+
+    return data;
 }
 
 RegisterData readRegisterData(QDataStream& stream)
@@ -36,6 +42,7 @@ RegisterData readRegisterData(QDataStream& stream)
     data.login = login;
     data.password = password;
     data.email = email;
+
     return data;
 }
 
@@ -43,14 +50,55 @@ int readCommand(QDataStream& stream)
 {
     int command = 0;
     stream >> command;
+
     return command;
+}
+
+bool sendCommand(QTcpSocket* socket, int command)
+{
+    if (socket->state() != QTcpSocket::ConnectedState) {
+        qDebug() << "socket not connected";
+
+        return false;
+    }
+
+    QByteArray msg;
+    QDataStream stream(&msg, QIODevice::WriteOnly);
+    QDataStream socketStream(socket);
+    stream << command;
+    socketStream << msg.size() << msg;
+    socket->flush();
+
+    return true;
+}
+
+bool send(QTcpSocket* socket, int command, const QByteArray& data)
+{
+    if (socket->state() != QTcpSocket::ConnectedState) {
+        qDebug() << "socket not connected";
+
+        return false;
+    }
+
+    QByteArray msg;
+    QDataStream stream(&msg, QIODevice::WriteOnly);
+    QDataStream socketStream(socket);
+    stream << command << data;
+    socketStream << msg.size() << msg;
+    socket->flush();
+
+    return true;
 }
 
 };
 
 Server::Server(QHostAddress address, int port)
 {
-
+    if (!listen(address, port)) {
+        qDebug() << "bad settings";
+        return;
+    }
+    qDebug() << "server listening on: " << address << " " <<port;
 }
 
 Server::~Server()
@@ -68,26 +116,22 @@ void Server::incomingConnection(qintptr socketDescriptor)
     socket->setSocketDescriptor(socketDescriptor);
 
     connect(socket, &QTcpSocket::readyRead, [this, socket] () {
-        int packageSize = -1;
-        QTcpSocket* client = static_cast<QTcpSocket*>(sender());
-        QDataStream another(client);
+        QDataStream another(socket);
 
-        if ((client->bytesAvailable() >= sizeof(int)) && packageSize == -1) {
-            another >> packageSize;
+        if ((socket->bytesAvailable() >= sizeof(int)) && this->m_packageSize == -1) {
+            another >> this->m_packageSize;
         } else {
             return;
         }
 
-        if (client->bytesAvailable() < packageSize) {
+        if (socket->bytesAvailable() < this->m_packageSize) {
             return;
         }
 
         QByteArray data;
-
         another >> data;
-        packageSize = -1;
-        m_pendingConnections.push_back(socket);
-        handleData(data);
+        this->m_packageSize = -1;
+        handleData(socket, data);
     });
 
     // void handle disconnect
@@ -99,28 +143,31 @@ void Server::incomingConnection(qintptr socketDescriptor)
     m_pendingConnections.push_back(socket);
 }
 
-void Server::handleData(const QByteArray& data)
+void Server::handleData(QTcpSocket* socket, const QByteArray& data)
 {
     QDataStream stream(data);
     int command = Internal::readCommand(stream);
-    User user;
 
     switch (command) {
     case Protocol::Client::CL_HELLO: {
-        QByteArray clientData;
-        clientData.append(Protocol::Server::SV_HELLO);
-         // TODO: propper write to BA
-        //socket->write(clientData);
+        Internal::sendCommand(socket, Protocol::Server::SV_HELLO);
+
         return;
     }
 
     case Protocol::Client::CL_LOGIN: {
         auto loginData = Internal::readClientData(stream);
 
+        qDebug() << loginData.login << " " << loginData.password;
 
-        if (!UserRepository::login(loginData, user)) {
-            qDebug() << "failed to login";
-            //socket->close(); // also notify user
+        User user(socket);
+        if (!UserRepository::instance()->login(loginData, user)) {
+            Message msg;
+            msg.msg = "failed to login";
+            qDebug() << msg.msg;
+            Internal::send(socket, Protocol::Errors::SV_LOGIN_ERR, msg.serialize());
+            socket->close();
+
             return;
         }
 
@@ -130,29 +177,33 @@ void Server::handleData(const QByteArray& data)
             command = Protocol::Server::SV_LOGIN;
         }
 
-        QByteArray clientData;
-        QDataStream clientStream(clientData);
-        clientStream << command;
-        //TODO overload for user;
-        clientStream << user;
-        //socket->write(clientData);
+        qDebug() << user.toString();
+
+        Internal::send(socket, command, user.serialize());
         break;
     }
 
     case Protocol::Client::CL_REGISTER: {
         auto registerData = Internal::readRegisterData(stream);
-        User user;
-        if (UserRepository::registerUser(registerData)) {
-            UserController::instance()->addUser(user);
-        } else {
-           // socket->close();
+
+        Message msg;
+        if (!UserRepository::instance()->registerUser(registerData)) {
+            msg.msg = "failed to register";
+            qDebug() << msg.msg;
+            Internal::send(socket, Protocol::Errors::SV_REGISTRATION_ERR, msg.serialize());
+            socket->close();
+
+            return;
         }
 
+        Internal::send(socket, Protocol::Server::SV_REGISTER, msg.serialize());
         break;
     }
+
     default:
         qDebug() << "Incorrect command";
-        //socket->close();
+        socket->close();
+
         return;
     }
 }

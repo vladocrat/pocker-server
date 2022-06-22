@@ -1,49 +1,27 @@
 #ifndef ROOM_H
 #define ROOM_H
 
+#include <QList>
 #include <QObject>
 
-#include "player.h"
-#include "card.h"
+#include "user.h"
 #include "gamelogic.h"
 
-class Room : public QObject
+class Room : QObject
 {
-    Q_OBJECT;
+    Q_OBJECT
 public:
     Room();
-    const int bet() const;
-    const int bank() const;
-    void addToTable(Card);
 
 public slots:
-    void setPlayer(Player*);
-    void notifyBet(Player*);
-    void notifyRaise(Player*, int bet);
-    void notifyAllIn(Player*, int playersMoney);
-    void notifyFold(Player*);
-    void notifyCall(Player*);
-    void notifyCheck(Player*);
+    void onUserJoined(); // member function
 
 signals:
-    void onBet(int bank, int bet);
-    void onRaise(int command, int money);
-    void onAllIn(int command, int money);
-    void onCall(int command, int money);
-    void onFold(int command, int money);
-    void onCheck(int command, int money);
+    void onUserLeft(const User*); // correct
 
 private:
-    void notifyAllPlayers(int command, int money = -1);
-
-
-private:
-    QVector<Player*> m_players;
-    QVector<Card> m_table;
-    GameLogic* m_logic = nullptr;
-    //the bet that is currently in the game/round.
-    int m_bet = 0;
-    int m_bank = 0;
+    QList<User> m_users;
+    GameLogic m_logic;
 };
 
 #endif // ROOM_H

@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QString>
+#include <QtSql/QSqlDatabase>
 
 #include "user.h"
 #include "LoginData.h"
@@ -12,12 +13,27 @@ class UserRepository : public QObject
 {
     Q_OBJECT
 public:
-    explicit UserRepository(QObject *parent = nullptr);
-    //singleton?
+    static UserRepository* instance() {
+        static UserRepository ur;
+        return &ur;
+    }
 
-    static bool removeUser(const User&);
-    static bool registerUser(const RegisterData&);
-    static bool login(const LoginData&, User&);
+    bool removeUser(const User&);
+    bool registerUser(const RegisterData&);
+    bool login(const LoginData&, User&);
+    bool userExists(const RegisterData&, bool* ok = nullptr);
+    bool userExists(const LoginData&, bool* ok = nullptr);
+    bool findUserByName(const QString&, User&);
+    bool findUserByEmail(const QString&, User&);
+
+private:
+    bool executeQuery(QSqlQuery& query);
+    bool open();
+
+    UserRepository();
+    ~UserRepository();
+
+    QSqlDatabase m_db;
 };
 
 #endif // USERREPOSITORY_H

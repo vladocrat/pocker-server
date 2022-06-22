@@ -3,45 +3,67 @@
 
 #include <QTcpSocket>
 #include <QObject>
+#include <QString>
+#include <memory>
+#include <assert.h>
 
+#include "profile.h"
+#include "card.h"
 
 class User : public QObject
 {
     Q_OBJECT
 public:
-    User(const QString& login = "default");
-    ~User();
+    explicit User(QTcpSocket* socket)
+    {
+        assert(socket);
+        m_socket = socket;
+    }
+    User(const User&);
+    ~User()
+    {
+        assert(m_socket);
+        m_socket->close();
+        //m_socket->deleteLater();
+    }
 
-    QTcpSocket* socket() const;
-    QString login() const;
-    void setSocket(QTcpSocket*);
+    void setProfile(const Profile&);
 
-public slots:
-    void readySend(int command, int money = -1);
 
-private slots:
-    void readMessage();
-    void writeMessage(int command, int money = -1);
-    void onSocketDisconnected();
+    QString toString()
+    {
+        return m_profile.toString();
+    }
+
+    QByteArray serialize() const;
 
 signals:
-    void onUserConnectionLost(User*);
-    void onUserConnected();
-    void bet(int);
-    void fold();
-    void raise(int);
-    void allIn();
-    void call();
-    void check();
-    void roomChosen(int);
+    // controller side signals
+    //void enterRoom
+    //void leaveRoom
+    // etc
 
+    // game side signals
+    // void makeBet
+    // etc
+
+private slots:
+    void handleClientCommand(); // socket readyRead
+                                // read CL_* command, convert to according signal and emit
+                                // UserController and room (if needed) connects to according signals.
 private:
-    void handleData(const QByteArray&);
+    friend QDataStream& operator<<(QDataStream&, const User&);
 
-    //coz socket is null ptr (need to initialize) we are not able to connect? or some shit
-    QTcpSocket* m_socket = nullptr;
-    QString m_login = "";
-    int m_packageSize = -1;
+    QTcpSocket* m_socket;
+    Profile m_profile;
+    struct GameData {
+        QVector<Card> m_hand;
+        int m_money = 0;
+        int m_bet = 0;
+    };
+
+    std::unique_ptr<GameData> m_gameDataImpl;
 };
+
 
 #endif // USER_H

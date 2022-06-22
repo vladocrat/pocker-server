@@ -19,8 +19,9 @@ protected:
     void incomingConnection(qintptr handle) override;
 
 private:
-    void handleData(const QByteArray&);
+    void handleData(QTcpSocket*,const QByteArray&);
 
+    int m_packageSize = -1;
     QList<QTcpSocket*> m_pendingConnections;
 };
 #endif // SERVER_H

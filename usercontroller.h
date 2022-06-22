@@ -3,6 +3,7 @@
 
 #include <QByteArray>
 #include <QObject>
+#include <QList>
 
 #include "user.h"
 
@@ -27,6 +28,9 @@ private:
     UserController(const UserController&) = delete;
     UserController(UserController&&) = delete;
     UserController& operator=(const UserController&);
+
+   // QList<User> m_users;
+
 };
 
 #endif // USERCONTROLLER_H

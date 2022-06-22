@@ -5,6 +5,15 @@
 
 struct RegisterData : public LoginData
 {
+    QByteArray serialize() const
+    {
+        QByteArray arr;
+        QDataStream stream(arr);
+        stream << login << password << email;
+
+        return arr;
+    }
+
     QString email;
 };
 

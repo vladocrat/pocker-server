@@ -7,8 +7,6 @@
 int main(int argc, char *argv[])
 {
     QCoreApplication app(argc, argv);
-    Room room;
-    Server server(QHostAddress("127.0.0.1"), 7890);
-    GameLogic logic;
+    Server server(QHostAddress("127.0.0.1"), 8082);
     return app.exec();
 }

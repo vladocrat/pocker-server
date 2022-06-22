@@ -25,17 +25,19 @@ static const int SV_HELLO = 1;
 static const int SV_LOGIN = 3;
 static const int SV_BET = 5;
 static const int SV_FOLD = 7;
-static const int CL_RAISE = 9;
-static const int CL_ALLIN = 11;
-static const int CL_CALL = 13;
-static const int CL_CHECK = 15;
-static const int CL_ROOM_CHOICE = 17;
+static const int SV_RAISE = 9;
+static const int SV_ALLIN = 11;
+static const int SV_CALL = 13;
+static const int SV_CHECK = 15;
+static const int SV_ROOM_CHOICE = 17;
+static const int SV_REGISTER = 19;
 }; // Server
 
 // error handling
 namespace Errors
 {
-static const int SV_LOGIN_ERR = 18;
+static const int SV_LOGIN_ERR = 100;
+static const int SV_REGISTRATION_ERR = 101;
 };
 }
 
