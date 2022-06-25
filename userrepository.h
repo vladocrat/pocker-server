@@ -6,32 +6,36 @@
 #include <QtSql/QSqlDatabase>
 
 #include "user.h"
-#include "LoginData.h"
-#include "RegisterData.h"
+#include "../common/LoginData.h"
+#include "../common/RegisterData.h"
 
 class UserRepository : public QObject
 {
     Q_OBJECT
 public:
-    static UserRepository* instance() {
-        static UserRepository ur;
-        return &ur;
+    static UserRepository* instance()
+    {
+        static UserRepository r;
+        return &r;
     }
 
     bool removeUser(const User&);
     bool registerUser(const RegisterData&);
-    bool login(const LoginData&, User&);
+    bool login(const LoginData&, Profile&);
     bool userExists(const RegisterData&, bool* ok = nullptr);
     bool userExists(const LoginData&, bool* ok = nullptr);
     bool findUserByName(const QString&, User&);
     bool findUserByEmail(const QString&, User&);
 
 private:
-    bool executeQuery(QSqlQuery& query);
-    bool open();
-
     UserRepository();
     ~UserRepository();
+    UserRepository(const UserRepository&) = delete;
+    UserRepository(UserRepository&&) = delete;
+    UserRepository& operator=(const UserRepository&) = delete;
+
+    bool executeQuery(QSqlQuery& query);
+    bool open();
 
     QSqlDatabase m_db;
 };

@@ -1,5 +1,5 @@
 #include "room.h"
-#include "protocol.h"
+#include "../common/protocol.h"
 
 Room::Room()
 {

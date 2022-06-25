@@ -7,21 +7,40 @@
 #include <QObject>
 #include <QByteArray>
 
+#include "pendingconnection.h"
+
 class Server : public QTcpServer
 {
     Q_OBJECT
 public:
-    //TODO make singleton
-    Server(QHostAddress address, int port = 0);
-    ~Server();
+    static Server* instance()
+    {
+        static Server s;
+        return &s;
+    }
+
+    void listen();
+    void setAddress(const QHostAddress& address);
+    void setAddress(const QString& address);
+    void setPort(int port);
+    QHostAddress address();
+    int port();
+
+public slots:
+    void authorised(const Profile&);
 
 protected:
     void incomingConnection(qintptr handle) override;
 
 private:
-    void handleData(QTcpSocket*,const QByteArray&);
+    Server();
+    ~Server();
+    Server(const Server&) = delete;
+    Server(Server&&) = delete;
+    Server& operator=(const Server&) = delete;
 
-    int m_packageSize = -1;
-    QList<QTcpSocket*> m_pendingConnections;
+    QHostAddress m_address = QHostAddress::Any;
+    int m_port = 0;
+    QList<PendingConnection*> m_pendingConnections;
 };
 #endif // SERVER_H

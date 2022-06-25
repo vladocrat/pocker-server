@@ -9,33 +9,22 @@
 
 #include "profile.h"
 #include "card.h"
+#include "userconnection.h"
+#include "pendingconnection.h"
 
 class User : public QObject
 {
     Q_OBJECT
 public:
-    explicit User(QTcpSocket* socket)
-    {
-        assert(socket);
-        m_socket = socket;
-    }
+    explicit User(UserConnection* socket);
     User(const User&);
-    ~User()
-    {
-        assert(m_socket);
-        m_socket->close();
-        //m_socket->deleteLater();
-    }
+    ~User();
 
     void setProfile(const Profile&);
-
-
-    QString toString()
-    {
-        return m_profile.toString();
-    }
-
+    QString toString() const;
     QByteArray serialize() const;
+    QString name() const;
+    UserConnection* connection() const;
 
 signals:
     // controller side signals
@@ -54,7 +43,7 @@ private slots:
 private:
     friend QDataStream& operator<<(QDataStream&, const User&);
 
-    QTcpSocket* m_socket;
+    UserConnection* m_socket;
     Profile m_profile;
     struct GameData {
         QVector<Card> m_hand;

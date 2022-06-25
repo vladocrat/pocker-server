@@ -9,10 +9,12 @@ struct Profile
 {
     friend QDataStream& operator<<(QDataStream&, const Profile&);
 
-    QString toString();
+    QByteArray serialize() const;
+    QString toString() const;
 
     QString pfpLink;
     QString name;
     QString email;
 };
+
 #endif // PROFILE_H

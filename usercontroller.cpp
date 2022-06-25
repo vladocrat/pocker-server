@@ -1,15 +1,26 @@
 #include "usercontroller.h"
 
-bool UserController::addUser(const User& user)
+#include <algorithm>
+
+#include "userconnection.h"
+#include "../common/protocol.h"
+
+void UserController::addUser(User* user)
 {
-    //TODO???
-    //m_users.append(user);
-    return true;
+    m_users.append(user);
 }
 
-const User& UserController::findUserByName(const QString&)
+//bool UserController::findUser(const User& user)
+//{
+//    return  m_users.indexOf(user) != -1;
+//}
+
+bool UserController::findUserByName(const QString& name)
 {
-    return User(new QTcpSocket);
+    return std::find_if(m_users.begin(), m_users.end(), [&name](User* user)
+    {
+        return name == user->name();
+    }) != m_users.end();
 }
 
 void UserController::onRoomChosen(int roomId)
@@ -22,7 +33,3 @@ void UserController::onRoomExited()
 
 }
 
-UserController::UserController()
-{
-
-}

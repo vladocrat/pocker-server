@@ -1,211 +1,105 @@
 #include <QtCore>
 #include <QTcpSocket>
 #include <QDebug>
-#include <QDataStream>
 #include <QString>
+#include <iostream>
 
 #include "server.h"
-#include "room.h"
-#include "protocol.h"
-#include "LoginData.h"
-#include "RegisterData.h"
-#include "userrepository.h"
 #include "usercontroller.h"
-#include "Message.h"
+#include "../common/protocol.h"
 
-namespace Internal
+Server::Server()
 {
 
-LoginData readClientData(QDataStream& stream)
-{
-    QString login;
-    QString password;
-    stream >> login;
-    stream >> password;
-    LoginData data;
-    data.login = login;
-    data.password = password;
-
-    return data;
-}
-
-RegisterData readRegisterData(QDataStream& stream)
-{
-    QString login;
-    QString password;
-    QString email;
-    stream >> login;
-    stream >> password;
-    stream >> email;
-
-    RegisterData data;
-    data.login = login;
-    data.password = password;
-    data.email = email;
-
-    return data;
-}
-
-int readCommand(QDataStream& stream)
-{
-    int command = 0;
-    stream >> command;
-
-    return command;
-}
-
-bool sendCommand(QTcpSocket* socket, int command)
-{
-    if (socket->state() != QTcpSocket::ConnectedState) {
-        qDebug() << "socket not connected";
-
-        return false;
-    }
-
-    QByteArray msg;
-    QDataStream stream(&msg, QIODevice::WriteOnly);
-    QDataStream socketStream(socket);
-    stream << command;
-    socketStream << msg.size() << msg;
-    socket->flush();
-
-    return true;
-}
-
-bool send(QTcpSocket* socket, int command, const QByteArray& data)
-{
-    if (socket->state() != QTcpSocket::ConnectedState) {
-        qDebug() << "socket not connected";
-
-        return false;
-    }
-
-    QByteArray msg;
-    QDataStream stream(&msg, QIODevice::WriteOnly);
-    QDataStream socketStream(socket);
-    stream << command << data;
-    socketStream << msg.size() << msg;
-    socket->flush();
-
-    return true;
-}
-
-};
-
-Server::Server(QHostAddress address, int port)
-{
-    if (!listen(address, port)) {
-        qDebug() << "bad settings";
-        return;
-    }
-    qDebug() << "server listening on: " << address << " " <<port;
 }
 
 Server::~Server()
 {
-    for (auto& socket: m_pendingConnections) {
-        socket->close();
+    for (auto pendingConnection: qAsConst(m_pendingConnections)) {
+        if (pendingConnection->socket()) {
+            pendingConnection->socket()->close();
+        }
     }
 }
 
+void Server::listen()
+{
+    if (!QTcpServer::listen(m_address, m_port)) {
+        qDebug() << "bad settings";
+
+        return;
+    }
+
+    qDebug() << "server listening on: " << m_address << " " << m_port;
+}
 
 void Server::incomingConnection(qintptr socketDescriptor)
 {
-    QTcpSocket* socket = new QTcpSocket;
+    auto pendingConnection = new PendingConnection;
+    pendingConnection->socket()->setSocketDescriptor(socketDescriptor);
 
-    socket->setSocketDescriptor(socketDescriptor);
-
-    connect(socket, &QTcpSocket::readyRead, [this, socket] () {
-        QDataStream another(socket);
-
-        if ((socket->bytesAvailable() >= sizeof(int)) && this->m_packageSize == -1) {
-            another >> this->m_packageSize;
-        } else {
-            return;
-        }
-
-        if (socket->bytesAvailable() < this->m_packageSize) {
-            return;
-        }
-
-        QByteArray data;
-        another >> data;
-        this->m_packageSize = -1;
-        handleData(socket, data);
+    connect(pendingConnection->socket(), &QTcpSocket::disconnected, [this, pendingConnection] () {
+        m_pendingConnections.removeOne(pendingConnection);
     });
 
-    // void handle disconnect
-    connect(socket, &QTcpSocket::disconnected, [this, socket] () {
-        m_pendingConnections.removeOne(socket);
-        socket->deleteLater();
-    });
-
-    m_pendingConnections.push_back(socket);
+    m_pendingConnections.push_back(pendingConnection);
 }
 
-void Server::handleData(QTcpSocket* socket, const QByteArray& data)
+void Server::authorised(const Profile& profile)
 {
-    QDataStream stream(data);
-    int command = Internal::readCommand(stream);
+    auto pendingConnection = static_cast<PendingConnection*>(sender());
 
-    switch (command) {
-    case Protocol::Client::CL_HELLO: {
-        Internal::sendCommand(socket, Protocol::Server::SV_HELLO);
+    if (UserController::instance()->findUserByName(profile.name)) {
+
+        if (!pendingConnection->sendCommand(Protocol::Errors::SV_ALREADY_LOGED_ERR)) {
+            qDebug() << "failed to send";
+        }
+
+        qDebug() << "user is already logged in";
+        pendingConnection->socket()->close();
+        pendingConnection->deleteLater();
 
         return;
     }
 
-    case Protocol::Client::CL_LOGIN: {
-        auto loginData = Internal::readClientData(stream);
+    m_pendingConnections.removeOne(pendingConnection);
+    auto userConnection = new UserConnection;
+    userConnection->setScoket(pendingConnection->clearSocket());
+    userConnection->init();
+    auto user = new User(userConnection);
+    user->setProfile(profile);
 
-        qDebug() << loginData.login << " " << loginData.password;
-
-        User user(socket);
-        if (!UserRepository::instance()->login(loginData, user)) {
-            Message msg;
-            msg.msg = "failed to login";
-            qDebug() << msg.msg;
-            Internal::send(socket, Protocol::Errors::SV_LOGIN_ERR, msg.serialize());
-            socket->close();
-
-            return;
-        }
-
-        if (!UserController::instance()->addUser(user)) {
-            command = Protocol::Errors::SV_LOGIN_ERR;
-        } else {
-            command = Protocol::Server::SV_LOGIN;
-        }
-
-        qDebug() << user.toString();
-
-        Internal::send(socket, command, user.serialize());
-        break;
+    if (!userConnection->send(Protocol::Server::SV_LOGIN, user->serialize())) {
+        qDebug() << "failed to send";
+        userConnection->socket()->close();
+        userConnection->deleteLater();
     }
 
-    case Protocol::Client::CL_REGISTER: {
-        auto registerData = Internal::readRegisterData(stream);
-
-        Message msg;
-        if (!UserRepository::instance()->registerUser(registerData)) {
-            msg.msg = "failed to register";
-            qDebug() << msg.msg;
-            Internal::send(socket, Protocol::Errors::SV_REGISTRATION_ERR, msg.serialize());
-            socket->close();
-
-            return;
-        }
-
-        Internal::send(socket, Protocol::Server::SV_REGISTER, msg.serialize());
-        break;
-    }
-
-    default:
-        qDebug() << "Incorrect command";
-        socket->close();
-
-        return;
-    }
+    UserController::instance()->addUser(user);
 }
 
+void Server::setAddress(const QHostAddress &address)
+{
+    m_address = address;
+}
 
+void Server::setAddress(const QString &address)
+{
+    QHostAddress hostAddress(address);
+    m_address = hostAddress;
+}
+
+void Server::setPort(int port)
+{
+    m_port = port;
+}
+
+QHostAddress Server::address()
+{
+    return m_address;
+}
+
+int Server::port()
+{
+    return m_port;
+}

@@ -64,7 +64,7 @@ bool UserRepository::registerUser(const RegisterData& data)
     return true;
 }
 
-bool UserRepository::login(const LoginData& data, User& user)
+bool UserRepository::login(const LoginData& data, Profile& profile)
 {   
     if (!userExists(data)) {
         qDebug() << "user doesn't exist";
@@ -74,11 +74,15 @@ bool UserRepository::login(const LoginData& data, User& user)
     auto passwordHash = QCryptographicHash::hash(data.password.toUtf8(),
                                                  QCryptographicHash::Algorithm::Sha256);
     QSqlQuery query;
-    query.prepare("SELECT name, password FROM \"Users\" WHERE name=:uname AND password=:upassword");
+    query.prepare("SELECT name, pfp, email FROM \"Users\" WHERE name=:uname AND password=:upassword");
     query.bindValue(":uname", data.login);
-    query.bindValue("upassword", passwordHash);
+    query.bindValue(":upassword", passwordHash);
 
     if (!executeQuery(query)) {
+        return false;
+    }
+
+    if (query.size() == 0) {
         return false;
     }
 
@@ -96,17 +100,17 @@ bool UserRepository::login(const LoginData& data, User& user)
         pfpLink = query.value(pfpLinkIx).toString();
     }
 
-    Profile profile;
+
     profile.name = name;
     profile.email = email;
     profile.pfpLink = pfpLink;
-    user.setProfile(profile);
 
     return true;
 }
 
 bool UserRepository::userExists(const RegisterData& userData, bool* ok)
 {
+    //TODO make one query
     if (!m_db.isOpen()) {
 
         if (!ok) {
@@ -114,12 +118,32 @@ bool UserRepository::userExists(const RegisterData& userData, bool* ok)
         }
 
         *ok = false;
+
         return false;
     }
 
     QSqlQuery query;
-    query.prepare("SELECT name, email FROM \"Users\" WHERE name=:uname AND email=:uemail");
+    query.prepare("SELECT name FROM \"Users\" WHERE name=:uname");
     query.bindValue(":uname", userData.login, QSql::Out);
+
+    if (!executeQuery(query)) {
+
+        if (!ok) {
+            return false;
+        }
+
+        *ok = false;
+
+        return false;
+    }
+
+    if (query.size() > 0) {
+        qDebug() << "user already exists";
+
+        return true;
+    }
+
+    query.prepare("SELECT email FROM \"Users\" WHERE email=:uemail");
     query.bindValue(":uemail", userData.email, QSql::Out);
 
     if (!executeQuery(query)) {
@@ -129,11 +153,13 @@ bool UserRepository::userExists(const RegisterData& userData, bool* ok)
         }
 
         *ok = false;
+
         return false;
     }
 
     if (query.size() > 0) {
-        qDebug() << "User already exsists";
+        qDebug() << "user already exists";
+
         return true;
     }
 
@@ -142,8 +168,6 @@ bool UserRepository::userExists(const RegisterData& userData, bool* ok)
 
 bool UserRepository::userExists(const LoginData& userData,  bool* ok)
 {
-    //check
-    //rewrite
     if (!m_db.isOpen()) {
         return true;
     }
@@ -158,6 +182,7 @@ bool UserRepository::userExists(const LoginData& userData,  bool* ok)
 
     if (query.size() > 0) {
         qDebug() << "User exsists";
+
         return true;
     }
 

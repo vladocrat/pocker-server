@@ -16,21 +16,30 @@ public:
         return &controller;
     }
 
-    bool addUser(const User&);
-    const User& findUserByName(const QString&);
+    void addUser(User*);
+    //bool findUser(const User&);
+    bool findUserByName(const QString&);
 
 public slots:
     void onRoomChosen(int roomId);
     void onRoomExited();
 
 private:
-    UserController();
+    UserController() {};
+    ~UserController()
+    {
+        for (auto x: qAsConst(m_users)) {
+            if (x) {
+                delete x;
+            }
+        }
+    }
+
     UserController(const UserController&) = delete;
     UserController(UserController&&) = delete;
-    UserController& operator=(const UserController&);
+    UserController& operator=(const UserController&) = delete;
 
-   // QList<User> m_users;
-
+    QList<User*> m_users;
 };
 
 #endif // USERCONTROLLER_H
