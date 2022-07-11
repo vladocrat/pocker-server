@@ -6,8 +6,8 @@
 #include <QtSql/QSqlDatabase>
 
 #include "user.h"
-#include "../common/LoginData.h"
-#include "../common/RegisterData.h"
+#include "LoginData.h"
+#include "RegisterData.h"
 
 class UserRepository : public QObject
 {

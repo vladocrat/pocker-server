@@ -2,12 +2,12 @@
 
 #include <QDataStream>
 
-#include "../common/protocol.h"
-#include "../common/LoginData.h"
-#include "../common/RegisterData.h"
-#include "../common/Message.h"
+#include "protocol.h"
+#include "LoginData.h"
+#include "RegisterData.h"
+#include "Message.h"
 #include "userrepository.h"
-#include "usercontroller.h"
+#include "controllers/usercontroller.h"
 #include "server.h"
 
 namespace Internal
@@ -89,6 +89,7 @@ void PendingConnection::handleData()
             return;
         }
 
+        //TODO return list of rooms on success
         qDebug() << profile.toString();
         emit logged(profile);
         break;

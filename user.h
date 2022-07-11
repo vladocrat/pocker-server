@@ -9,8 +9,8 @@
 
 #include "profile.h"
 #include "card.h"
-#include "userconnection.h"
-#include "pendingconnection.h"
+#include "connections/userconnection.h"
+#include "connections/pendingconnection.h"
 
 class User : public QObject
 {
@@ -25,25 +25,25 @@ public:
     QByteArray serialize() const;
     QString name() const;
     UserConnection* connection() const;
+    void closeConnection();
+    void sendCommand(int command) const;
+    void send(int command, const QByteArray&);
 
 signals:
-    // controller side signals
-    //void enterRoom
-    //void leaveRoom
+    void enterRoom(int roomId);
+    void leaveRoom();
     // etc
 
     // game side signals
     // void makeBet
     // etc
+public slots:
+    void sendLeft();
 
-private slots:
-    void handleClientCommand(); // socket readyRead
-                                // read CL_* command, convert to according signal and emit
-                                // UserController and room (if needed) connects to according signals.
 private:
     friend QDataStream& operator<<(QDataStream&, const User&);
 
-    UserConnection* m_socket;
+    UserConnection* m_connection;
     Profile m_profile;
     struct GameData {
         QVector<Card> m_hand;

@@ -7,21 +7,31 @@
 #include "user.h"
 #include "gamelogic.h"
 
-class Room : QObject
+class Room : public QObject
 {
     Q_OBJECT
 public:
+    Room(int id);
     Room();
+    Room(const Room&) {};
+    Room& operator=(const Room& other);
 
-public slots:
-    void onUserJoined(); // member function
+    bool addUser(User*);
+    int id() const ;
+
+private slots:
+    void onUserLeft();
 
 signals:
-    void onUserLeft(const User*); // correct
+    void update(Room* room);
 
 private:
-    QList<User> m_users;
+    void initUser(User* user);
+
+    QList<User*> m_users;
     GameLogic m_logic;
+    int m_maxPlayerCount = 4; // can be set by user creating the room.
+    int m_id = -1;
 };
 
 #endif // ROOM_H

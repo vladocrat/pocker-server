@@ -13,6 +13,10 @@ public:
 
     void init();
 
+signals:
+    void roomChosen(int roomId);
+    void roomLeft();
+
 private:
     void handleData();
 };

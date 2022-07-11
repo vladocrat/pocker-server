@@ -3,8 +3,8 @@
 #include <QDataStream>
 #include <QByteArray>
 
-#include "usercontroller.h"
-#include "../common/protocol.h"
+#include "controllers/usercontroller.h"
+#include "protocol.h"
 
 UserConnection::UserConnection()
 {
@@ -23,7 +23,7 @@ void UserConnection::handleData()
     QDataStream stream(data);
     int command = readCommand(stream);
 
-      //TODO handle data
+    //TODO handle data
 
     switch (command) {
     case Protocol::Client::CL_HELLO:
@@ -37,9 +37,25 @@ void UserConnection::handleData()
 
         break;
     }
+    case Protocol::Client::CL_CREATE_ROOM: {
+
+        break;
+    }
+    case Protocol::Client::CL_ROOM_CHOICE:
+    {
+        int roomId = -1;
+        stream >> roomId;
+        emit roomChosen(roomId);
+        break;
+    }
+    case Protocol::Client::CL_LEAVE_ROOM:
+    {
+        emit roomLeft();
+    }
     default:
     {
         qDebug() << "wrong command";
+        qDebug() << command;
         break;
     }
     }

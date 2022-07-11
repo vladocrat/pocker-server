@@ -3,7 +3,7 @@
 #include <QDataStream>
 #include <assert.h>
 
-#include "../common/protocol.h"
+#include "protocol.h"
 
 Connection::Connection()
 {
@@ -29,7 +29,11 @@ bool Connection::sendCommand(int command)
     QDataStream socketStream(m_socket);
     stream << command;
     socketStream << msg.size() << msg;
-    m_socket->flush();
+
+    if (!m_socket->flush()) {
+        qDebug() << "failed to flush socket";
+        return false;
+    }
 
     return true;
 }
@@ -43,7 +47,11 @@ bool Connection::send(int command, const QByteArray &data)
     QDataStream socketStream(m_socket);
     stream << command << data;
     socketStream << msg.size() << msg;
-    m_socket->flush();
+
+    if (!m_socket->flush()) {
+        qDebug() << "failed to flush socket";
+        return false;
+    }
 
     return true;
 }

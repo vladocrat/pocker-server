@@ -5,8 +5,8 @@
 #include <iostream>
 
 #include "server.h"
-#include "usercontroller.h"
-#include "../common/protocol.h"
+#include "controllers/usercontroller.h"
+#include "protocol.h"
 
 Server::Server()
 {

@@ -7,7 +7,7 @@
 #include <QObject>
 #include <QByteArray>
 
-#include "pendingconnection.h"
+#include "connections/pendingconnection.h"
 
 class Server : public QTcpServer
 {
