@@ -1,0 +1,3 @@
+[submodule "pocker-common"]
+	path = pocker-common
+	url = https://github.com/vladocrat/pocker-common
