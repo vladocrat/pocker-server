@@ -9,7 +9,7 @@ CONFIG -= app_bundle
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 INCLUDEPATH += "..\\pocker\\" \
-               "..\\common\\" \
+               "..\\pocker\\pocker-common\\" \
 
 
 HEADERS += \
@@ -18,27 +18,28 @@ HEADERS += \
     RegisterData.h \
     card.h \
     gamelogic.h \
+    lobby.h \
     profile.h \
     protocol.h \
-    room.h \
     server.h \
     user.h \
     userrepository.h \
-    ../common/*.h \
     controllers\\*.h \
     connections\\*.h \
+    pocker-common\\*.h \
 
 SOURCES += \
         card.cpp \
         gamelogic.cpp \
+        lobby.cpp \
         main.cpp \
         profile.cpp \
-        room.cpp \
         server.cpp \
         user.cpp \
         userrepository.cpp \
         controllers\\*.cpp \
-        connections\\*.cpp
+        connections\\*.cpp \
+        pocker-common\\*.cpp \
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
