@@ -5,5 +5,10 @@ GameLogic::GameLogic()
 
 }
 
+GameLogic &GameLogic::operator=(const GameLogic&)
+{
+    return *this;
+}
+
 
 

@@ -4,7 +4,9 @@
 #include <QByteArray>
 
 #include "controllers/usercontroller.h"
+#include "integer.h"
 #include "protocol.h"
+#include "room.h"
 
 UserConnection::UserConnection()
 {
@@ -37,15 +39,26 @@ void UserConnection::handleData()
 
         break;
     }
-    case Protocol::Client::CL_CREATE_ROOM: {
+    case Protocol::Client::CL_CREATE_ROOM:
+    {
+        //TODO join room on creation
+        QByteArray roomData;
+        stream >> roomData;
+        auto room = new Lobby(Room::deserialise(roomData));
+        UserController::instance()->addRoom(room);
+
+        if (!send(Protocol::Server::SV_ROOM_CREATED, Room::serialise(*room))) {
+            qDebug() << "failed to send";
+            socket()->close();
+        }
 
         break;
     }
     case Protocol::Client::CL_ROOM_CHOICE:
     {
-        int roomId = -1;
-        stream >> roomId;
-        emit roomChosen(roomId);
+        QByteArray arr;
+        stream >> arr;
+        emit roomChosen(Integer::deserealise(arr).val);
         break;
     }
     case Protocol::Client::CL_LEAVE_ROOM:
@@ -56,6 +69,7 @@ void UserConnection::handleData()
     {
         qDebug() << "wrong command";
         qDebug() << command;
+        socket()->close();
         break;
     }
     }

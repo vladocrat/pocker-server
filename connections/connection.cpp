@@ -50,6 +50,7 @@ bool Connection::send(int command, const QByteArray &data)
 
     if (!m_socket->flush()) {
         qDebug() << "failed to flush socket";
+
         return false;
     }
 

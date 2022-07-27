@@ -10,6 +10,7 @@ class GameLogic : public QObject
     Q_OBJECT;
 public:
     GameLogic();
+    GameLogic& operator=(const GameLogic&);
 
 private:
     void shuffle();

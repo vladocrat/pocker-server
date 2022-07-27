@@ -14,15 +14,16 @@ UserController::~UserController()
     }
 }
 
-void UserController::addRoom()
+void UserController::addRoom(Room* room)
 {
-    auto room = new Room(m_rooms.size());
-    m_rooms.append(room);
-    connect(room, &Room::update, this, &UserController::updateRoomInfo);
-    //TODO doesnt work:)
-//    connect(&room, &Room::onUserLeft, [this] () {
-//           //emit userLeft(user);
-//    });
+    auto lobby = dynamic_cast<Lobby*>(room);
+
+    if (!lobby) {
+        return;
+    }
+
+    room->setId(m_rooms.length() - 1);
+    m_rooms.append(lobby);
 }
 
 void UserController::addUser(User* user)
@@ -42,14 +43,16 @@ bool UserController::findUserByName(const QString& name) const
 void UserController::requestToJoin(int roomId)
 {
     auto user = static_cast<User*>(sender());
+    qDebug() << m_rooms.value(roomId);
+    auto r = m_rooms.value(roomId);
     m_rooms.value(roomId)->addUser(user);
 }
 
-void UserController::updateRoomInfo(Room *room)
+void UserController::updateRoomInfo(Lobby* lobby)
 {
     //TODO barr
-    for (auto user: m_users) {
-        user->send(Protocol::Server::SV_ROOM_UPDATED, QByteArray());
+    for (auto user: qAsConst(m_users)) {
+        user->send(Protocol::Server::SV_ROOM_UPDATED, Lobby::serialise(static_cast<Room>(*lobby)));
     }
 }
 

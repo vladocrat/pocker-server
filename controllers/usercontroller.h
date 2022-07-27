@@ -6,6 +6,7 @@
 #include <QList>
 
 #include "user.h"
+#include "lobby.h"
 #include "room.h"
 
 class UserController : public QObject
@@ -17,17 +18,16 @@ public:
         return &controller;
     }
 
-    void addRoom();
+    void addRoom(Room*);
     void addUser(User*);
     bool findUserByName(const QString&) const;
 
 signals:
     void userLeft(User* user);
 
-
 private slots:
     void requestToJoin(int roomId);
-    void updateRoomInfo(Room* room);
+    void updateRoomInfo(Lobby* room);
 
 private:
     UserController() {};
@@ -37,7 +37,7 @@ private:
     UserController& operator=(const UserController&) = delete;
 
     QList<User*> m_users;
-    QVector<Room*> m_rooms;
+    QVector<Lobby*> m_rooms;
 };
 
 #endif // USERCONTROLLER_H

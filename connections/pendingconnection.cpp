@@ -80,7 +80,7 @@ void PendingConnection::handleData()
             msg.text = "failed to login";
             qDebug() << msg.text;
 
-            if (!send(Protocol::Errors::SV_LOGIN_ERR, msg.serialize())) {
+            if (!send(Protocol::Errors::SV_LOGIN_ERR, msg.serialise())) {
                 qDebug() << "failed to send";
             }
 
@@ -104,7 +104,7 @@ void PendingConnection::handleData()
             msg.text = "failed to register";
             qDebug() << msg.text;
 
-            if (!send(Protocol::Errors::SV_REGISTRATION_ERR, msg.serialize())) {
+            if (!send(Protocol::Errors::SV_REGISTRATION_ERR, msg.serialise())) {
                 qDebug() << "failed to send";
             }
 
@@ -115,7 +115,7 @@ void PendingConnection::handleData()
 
         msg.text = "registered";
 
-        if (!send(Protocol::Server::SV_REGISTER, msg.serialize())) {
+        if (!send(Protocol::Server::SV_REGISTER, msg.serialise())) {
             qDebug() << "failed to send";
         }
 
