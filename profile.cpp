@@ -1,6 +1,7 @@
 #include "profile.h"
 
 #include <QDebug>
+#include <QIODevice>
 
 QDataStream& operator<<(QDataStream& out, const Profile& profile)
 {

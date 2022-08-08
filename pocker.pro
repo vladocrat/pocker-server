@@ -8,8 +8,9 @@ CONFIG -= app_bundle
 # In order to do so, uncomment the following line.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-INCLUDEPATH += "..\\pocker\\" \
-               "..\\pocker\\pocker-common\\" \
+INCLUDEPATH += ..\\server\\ \
+               ..\\server\\pocker-common\\ \
+               ..\\server\\pocker-common\\headers\\ \
 
 
 HEADERS += \
@@ -26,7 +27,7 @@ HEADERS += \
     userrepository.h \
     controllers\\*.h \
     connections\\*.h \
-    pocker-common\\*.h \
+    pocker-common\\headers\\*.h \
 
 SOURCES += \
         card.cpp \
@@ -39,7 +40,7 @@ SOURCES += \
         userrepository.cpp \
         controllers\\*.cpp \
         connections\\*.cpp \
-        pocker-common\\*.cpp \
+        pocker-common\\\sources\*.cpp \
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
