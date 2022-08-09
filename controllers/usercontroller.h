@@ -37,7 +37,7 @@ private:
     UserController& operator=(const UserController&) = delete;
 
     QList<User*> m_users;
-    QVector<Lobby*> m_rooms;
+    QVector<Lobby*> m_lobbies;
 };
 
 #endif // USERCONTROLLER_H

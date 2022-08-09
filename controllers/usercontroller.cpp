@@ -16,14 +16,14 @@ UserController::~UserController()
 
 void UserController::addRoom(Room* room)
 {
+    room->setId(m_lobbies.length());
     auto lobby = dynamic_cast<Lobby*>(room);
 
     if (!lobby) {
         return;
     }
 
-    room->setId(m_rooms.length() - 1);
-    m_rooms.append(lobby);
+    m_lobbies.append(lobby);
 }
 
 void UserController::addUser(User* user)
@@ -43,9 +43,7 @@ bool UserController::findUserByName(const QString& name) const
 void UserController::requestToJoin(int roomId)
 {
     auto user = static_cast<User*>(sender());
-    qDebug() << m_rooms.value(roomId);
-    auto r = m_rooms.value(roomId);
-    m_rooms.value(roomId)->addUser(user);
+    m_lobbies.value(roomId)->addUser(user);
 }
 
 void UserController::updateRoomInfo(Lobby* lobby)
