@@ -7,7 +7,6 @@
 #include "RegisterData.h"
 #include "Message.h"
 #include "userrepository.h"
-#include "controllers/usercontroller.h"
 #include "server.h"
 
 namespace Internal

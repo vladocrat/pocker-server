@@ -34,6 +34,7 @@ bool Lobby::addUser(User* user)
     //TODO check if able to join room
     //TODO check password
     //TODO update room on client
+    //TODO check if player is already in the room.
     if (m_users.count() >= maxPlayerCount()) {
         //TODO return error
         qDebug() << "exceeds max amount of players";
