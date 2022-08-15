@@ -3,6 +3,7 @@
 
 #include <QObject>
 
+#include "room.h"
 #include "connection.h"
 
 class UserConnection : public Connection
