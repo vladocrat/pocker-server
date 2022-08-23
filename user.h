@@ -25,9 +25,12 @@ public:
     QByteArray serialize() const;
     QString name() const;
     UserConnection* connection() const;
+    Profile profile() const;
     void closeConnection();
     void sendCommand(int command) const;
     void send(int command, const QByteArray&);
+
+    bool operator==(const User&) const;
 
 signals:
     void enterRoom(int roomId);

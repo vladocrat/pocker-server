@@ -31,6 +31,20 @@ void UserController::addUser(User* user)
     m_users.append(user);
     connect(user, &User::enterRoom, this, &UserController::requestToJoin);
     connect(this, &UserController::userLeft, user, &User::sendLeft);
+    connect(user->connection()->socket(), &QTcpSocket::disconnected, [this, user] () {
+        for (auto lobby : qAsConst(m_lobbies)) {
+            auto users = lobby->users();
+            auto userIt = users.begin();
+
+            while (userIt != users.end()) {
+                if (*userIt == user) {
+                    lobby->users().erase(userIt);
+                }
+            }
+        }
+
+        m_users.removeOne(user);
+    });
 }
 
 bool UserController::findUserByName(const QString& name) const
@@ -48,7 +62,6 @@ void UserController::requestToJoin(int roomId)
 
 void UserController::updateRoomInfo(Lobby* lobby)
 {
-    //TODO barr
     for (auto user: qAsConst(m_users)) {
         user->send(Protocol::Server::SV_ROOM_UPDATED, Lobby::serialise(static_cast<Room>(*lobby)));
     }

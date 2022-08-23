@@ -12,6 +12,23 @@ QDataStream& operator<<(QDataStream& out, const Profile& profile)
     return out;
 }
 
+bool Profile::operator==(const Profile& profile) const
+{
+    if (this->name != profile.name) {
+        return false;
+    }
+
+    if (this->email != profile.email) {
+        return false;
+    }
+
+    if (this->pfpLink != profile.pfpLink) {
+        return false;
+    }
+
+    return true;
+}
+
 QByteArray Profile::serialize() const
 {
     QByteArray arr;
