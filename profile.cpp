@@ -7,7 +7,11 @@ QDataStream& operator<<(QDataStream& out, const Profile& profile)
 {
     out << profile.name
         << profile.email
-        << profile.pfpLink;
+        << profile.pfpLink
+        << profile.wins
+        << profile.loses
+        << profile.totalSpent
+        << profile.totalWon;
 
     return out;
 }
@@ -18,7 +22,11 @@ QByteArray Profile::serialize() const
     QDataStream stream(&arr, QIODevice::WriteOnly);
     stream << name
            << email
-           << pfpLink;
+           << pfpLink
+           << wins
+           << loses
+           << totalSpent
+           << totalWon;
 
     return arr;
 }

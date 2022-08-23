@@ -43,19 +43,31 @@ bool UserRepository::registerUser(const RegisterData& data)
         return false;
     }
 
+    //insert into statistic
+    //insert into users
+    QSqlQuery createStatistic;
+    createStatistic.prepare(("INSERT INTO \"Statistic\" (wins, loses, total_spent, total_won) VALUES(?, ?, ?, ?)"));
+    createStatistic.bindValue(0, 0);
+    createStatistic.bindValue(1, 0);
+    createStatistic.bindValue(2, 0.0);
+    createStatistic.bindValue(3, 0.0);
+
+    if (!m_db.isOpen()) {
+        qDebug() << "no connection to db";
+
+        return false;
+    }
+
+    auto statisticId = createStatistic.lastInsertId();
     auto passwordHash = QCryptographicHash::hash(data.password.toUtf8(),
                                                  QCryptographicHash::Algorithm::Sha256);
 
     QSqlQuery query;
-    query.prepare("INSERT INTO \"Users\" (name, password, email) VALUES(?, ?, ?)");
+    query.prepare("INSERT INTO \"users\" (name, password, email, statistic_id) VALUES(?, ?, ?, ?)");
     query.bindValue(0, data.login);
     query.bindValue(1, passwordHash);
     query.bindValue(2, data.email);
-
-    if (!m_db.isOpen()) {
-        qDebug() << "no connection to db";
-        return false;
-    }
+    query.bindValue(3, statisticId.toInt());
 
     if (!executeQuery(query)) {
         return false;
@@ -263,6 +275,7 @@ bool UserRepository::executeQuery(QSqlQuery& query)
     if (!query.exec()) {
         qDebug() << m_db.lastError();
         qDebug() << "last query: " + query.executedQuery();
+
         return false;
     }
 
@@ -275,7 +288,9 @@ bool UserRepository::open()
         if (m_db.open()) {
             return true;
         }
+
         qDebug() << m_db.lastError();
+
         return false;
     }
 

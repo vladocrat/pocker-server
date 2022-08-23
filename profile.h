@@ -15,6 +15,10 @@ struct Profile
     QString pfpLink;
     QString name;
     QString email;
+    int wins;
+    int loses;
+    int totalSpent;
+    int totalWon;
 };
 
 #endif // PROFILE_H
