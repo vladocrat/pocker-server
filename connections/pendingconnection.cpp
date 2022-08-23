@@ -88,7 +88,6 @@ void PendingConnection::handleData()
             return;
         }
 
-        //TODO return list of rooms on success
         qDebug() << profile.toString();
         emit logged(profile);
         break;

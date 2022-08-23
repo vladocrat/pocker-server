@@ -54,6 +54,21 @@ bool UserController::findUserByName(const QString& name) const
     }) != m_users.end();
 }
 
+QVector<Lobby*> UserController::rooms() const
+{
+    return m_lobbies;
+}
+
+QByteArray UserController::serialiseRooms() const
+{
+    QByteArray arr;
+    for (auto lobby : m_lobbies) {
+
+    }
+
+    return {};
+}
+
 void UserController::requestToJoin(int roomId)
 {
     auto user = static_cast<User*>(sender());

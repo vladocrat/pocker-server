@@ -21,6 +21,7 @@ public:
     void addRoom(Room*);
     void addUser(User*);
     bool findUserByName(const QString&) const;
+    QVector<Lobby*> lobbies();
 
 signals:
     void userLeft(User* user);
