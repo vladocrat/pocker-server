@@ -64,6 +64,11 @@ void Lobby::deserialise(const QByteArray& data)
     Room::deserialise(data);
 }
 
+QByteArray Lobby::seresialse() const
+{
+    return Room::serialise(static_cast<Room>(*this));
+}
+
 void Lobby::onUserLeft()
 {
     auto user = static_cast<User*>(sender());
@@ -76,7 +81,7 @@ void Lobby::onUserLeft()
 
 void Lobby::initUser(User* user)
 {
-    user->send(Protocol::Server::SV_JOINED_SUCCESSFULLY, serialise(static_cast<Room>(*this)));
+    user->send(Protocol::Server::SV_JOINED_SUCCESSFULLY, seresialse());
 }
 
 void Lobby::notifyUsers() const

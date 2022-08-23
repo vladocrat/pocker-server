@@ -75,8 +75,12 @@ void Server::authorised(const Profile& profile)
         userConnection->deleteLater();
     }
 
-    //TODO return list of rooms on success
-    //if (!userConnection->send(Protocol::Server::SV_LIST_OF_ROOMS, UserController::instance()->rooms()))
+    if (!userConnection->send(Protocol::Server::SV_LIST_OF_ROOMS,
+                              UserController::instance()->serialiseRooms())) {
+        qDebug() << "failed to send";
+        userConnection->socket()->close();
+        userConnection->deleteLater();
+    }
 
     UserController::instance()->addUser(user);
 }

@@ -62,11 +62,13 @@ QVector<Lobby*> UserController::rooms() const
 QByteArray UserController::serialiseRooms() const
 {
     QByteArray arr;
-    for (auto lobby : m_lobbies) {
+    QDataStream stream(&arr, QIODevice::WriteOnly);
 
+    for (auto lobby : m_lobbies) {
+        stream << lobby->seresialse();
     }
 
-    return {};
+    return arr;
 }
 
 void UserController::requestToJoin(int roomId)
