@@ -21,6 +21,8 @@ public:
     void addRoom(Room*);
     void addUser(User*);
     bool findUserByName(const QString&) const;
+    QVector<Lobby*> rooms() const;
+    QByteArray serialiseRooms() const;
 
 signals:
     void userLeft(User* user);

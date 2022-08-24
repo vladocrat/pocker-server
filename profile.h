@@ -8,6 +8,8 @@
 struct Profile
 {
     friend QDataStream& operator<<(QDataStream&, const Profile&);
+    
+    bool operator==(const Profile&) const;
 
     QByteArray serialize() const;
     QString toString() const;

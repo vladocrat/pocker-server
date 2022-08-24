@@ -48,6 +48,11 @@ UserConnection *User::connection() const
     return m_connection;
 }
 
+Profile User::profile() const
+{
+    return m_profile;
+}
+
 void User::closeConnection()
 {
     m_connection->socket()->close();
@@ -67,6 +72,11 @@ void User::send(int command, const QByteArray& data)
         qDebug() << "failed to send";
         m_connection->socket()->close();
     }
+}
+
+bool User::operator==(const User& user) const
+{
+    return m_profile == user.profile();
 }
 
 void User::sendLeft()

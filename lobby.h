@@ -21,6 +21,7 @@ public:
     void setLogic(const GameLogic&);
 
     static void deserialise(const QByteArray&);
+    QByteArray seresialse() const;
 
 private slots:
     void onUserLeft();
