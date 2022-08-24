@@ -38,7 +38,7 @@ void UserController::addUser(User* user)
 
             while (userIt != users.end()) {
                 if (*userIt == user) {
-                    lobby->users().erase(userIt);
+                    users.erase(userIt);
                 }
             }
         }
@@ -64,9 +64,10 @@ QByteArray UserController::serialiseRooms() const
     QByteArray arr;
     QDataStream stream(&arr, QIODevice::WriteOnly);
 
-    for (auto lobby : m_lobbies) {
-        stream << lobby->seresialse();
-    }
+    stream << m_lobbies;
+//    for (auto lobby : m_lobbies) {
+//        stream << lobby->seresialse();
+//    }
 
     return arr;
 }
