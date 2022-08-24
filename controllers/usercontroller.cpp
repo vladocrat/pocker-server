@@ -14,7 +14,7 @@ UserController::~UserController()
     }
 }
 
-void UserController::addRoom(Room* room)
+void UserController:: addRoom(Room* room)
 {
     room->setId(m_lobbies.length());
     auto lobby = dynamic_cast<Lobby*>(room);
@@ -63,11 +63,11 @@ QByteArray UserController::serialiseRooms() const
 {
     QByteArray arr;
     QDataStream stream(&arr, QIODevice::WriteOnly);
+    stream << m_lobbies.size();
 
-    stream << m_lobbies;
-//    for (auto lobby : m_lobbies) {
-//        stream << lobby->seresialse();
-//    }
+    for (auto lobby : m_lobbies) {
+        stream << lobby->seresialse();
+    }
 
     return arr;
 }

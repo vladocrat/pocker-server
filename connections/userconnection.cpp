@@ -64,6 +64,18 @@ void UserConnection::handleData()
     case Protocol::Client::CL_LEAVE_ROOM:
     {
         emit roomLeft();
+        break;
+    }
+    case Protocol::Client::CL_REQUEST_ROOMS:
+    {
+        if (!send(Protocol::Server::SV_LIST_OF_ROOMS,
+                                  UserController::instance()->serialiseRooms())) {
+            qDebug() << "failed to send";
+            socket()->close();
+            deleteLater();
+        }
+
+        break;
     }
     default:
     {
