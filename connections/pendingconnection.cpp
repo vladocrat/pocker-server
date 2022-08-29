@@ -13,10 +13,13 @@ namespace Internal
 {
 LoginData readClientData(QDataStream& stream)
 {
+    QByteArray arr;
+    stream >> arr;
+    QDataStream readLoginData(arr);
     QString login;
     QString password;
-    stream >> login;
-    stream >> password;
+    readLoginData >> login;
+    readLoginData >> password;
     LoginData data;
     data.login = login;
     data.password = password;
@@ -26,12 +29,15 @@ LoginData readClientData(QDataStream& stream)
 
 RegisterData readRegisterData(QDataStream& stream)
 {
+    QByteArray arr;
+    stream >> arr;
+    QDataStream readRegisterData(arr);
     QString login;
     QString password;
     QString email;
-    stream >> login;
-    stream >> password;
-    stream >> email;
+    readRegisterData >> login;
+    readRegisterData >> password;
+    readRegisterData >> email;
 
     RegisterData data;
     data.login = login;
@@ -76,7 +82,7 @@ void PendingConnection::handleData()
 
         if (!UserRepository::instance()->login(loginData, profile)) {
             Message msg;
-            msg.text = "failed to login";
+            msg.text = "Failed to login";
             qDebug() << msg.text;
 
             if (!send(Protocol::Errors::SV_LOGIN_ERR, msg.serialise())) {
@@ -96,12 +102,10 @@ void PendingConnection::handleData()
     case Protocol::Client::CL_REGISTER: {
         auto registerData = Internal::readRegisterData(stream);
 
-        Message msg;
-
         if (!UserRepository::instance()->registerUser(registerData)) {
-            msg.text = "failed to register";
-            qDebug() << msg.text;
 
+            Message msg;
+            msg.text = "Failed to register";
             if (!send(Protocol::Errors::SV_REGISTRATION_ERR, msg.serialise())) {
                 qDebug() << "failed to send";
             }
@@ -111,10 +115,9 @@ void PendingConnection::handleData()
             return;
         }
 
-        msg.text = "registered";
-
-        if (!send(Protocol::Server::SV_REGISTER, msg.serialise())) {
+        if (!sendCommand(Protocol::Server::SV_REGISTER)) {
             qDebug() << "failed to send";
+            socket()->close();
         }
 
         break;

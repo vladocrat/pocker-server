@@ -83,7 +83,6 @@ void User::sendLeft()
 {
     if (!connection()->sendCommand(Protocol::Server::SV_LEFT_SUCCESSFULLY)) {
         qDebug() << "faild to send command";
-        //TODO do nothing?
     }
 }
 
