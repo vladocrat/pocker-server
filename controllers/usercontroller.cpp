@@ -14,16 +14,18 @@ UserController::~UserController()
     }
 }
 
-void UserController:: addRoom(Room* room)
+bool UserController::addRoom(Room* room)
 {
     room->setId(m_lobbies.length());
     auto lobby = dynamic_cast<Lobby*>(room);
 
     if (!lobby) {
-        return;
+        return false;
     }
 
     m_lobbies.append(lobby);
+
+    return true;
 }
 
 void UserController::addUser(User* user)

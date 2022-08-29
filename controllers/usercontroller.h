@@ -18,7 +18,7 @@ public:
         return &controller;
     }
 
-    void addRoom(Room*);
+    [[nodiscard]] bool addRoom(Room*);
     void addUser(User*);
     bool findUserByName(const QString&) const;
     QVector<Lobby*> rooms() const;

@@ -45,7 +45,13 @@ void UserConnection::handleData()
         QByteArray roomData;
         stream >> roomData;
         auto room = new Lobby(Room::deserialise(roomData));
-        UserController::instance()->addRoom(room);
+
+        if (!UserController::instance()->addRoom(room)) {
+            if (!sendCommand(Protocol::Errors::SV_FAILED_TO_CREATE_ROOM)) {
+                qDebug() << "failed to create room";
+                socket()->close();
+            }
+        }
 
         if (!send(Protocol::Server::SV_ROOM_CREATED, Room::serialise(*room))) {
             qDebug() << "failed to send";
