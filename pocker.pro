@@ -4,18 +4,8 @@ QT += network sql
 CONFIG += c++11 console
 CONFIG -= app_bundle
 
-WORKING_SHADOW_BUILD_DIR = $$PWD
-
-message("pass $${WORKING_SHADOW_BUILD_DIR}")
-
-WORKING_SHADOW_BUILD_DIR = $$system(cd ..)
-
-message("new pass $${WORKING_SHADOW_BUILD_DIR}")
-
 INCLUDEPATH += $$PWD\\pocker-common\\headers\\ \
                $$PWD\\ \
-               #..\\server\\ \
-               #..\\server\\pocker-common\\ \
 
 HEADERS += \
     LoginData.h \
@@ -51,9 +41,5 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-DEFINES += DATABASE_PASSWORD=\\\"Adwxsqezc14\\\"\
-           DATABASE_HOSTNAME=\\\"localhost\\\"\
-           DATABASE_NAME=\\\"pocker\\\"\
-           DATABASE_USERNAME=\\\"postgres\\\"\
 
 

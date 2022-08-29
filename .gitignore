@@ -34,6 +34,7 @@ Makefile*
 .qtc_clangd/.../...
 debug/
 .qtc_clangd/
+*.conf
 
 # Qt unit tests
 target_wrapper.*
