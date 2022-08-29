@@ -5,15 +5,17 @@
 #include <QSqlRecord>
 #include <QCryptographicHash>
 #include <QByteArray>
+#include <QSettings>
 
 UserRepository::UserRepository()
 {
+    QSettings settings {"db_settings.conf", QSettings::IniFormat};
     m_db = QSqlDatabase::addDatabase("QPSQL");
-    m_db.setHostName(DATABASE_HOSTNAME);
-    m_db.setPort(5432);
-    m_db.setDatabaseName(DATABASE_NAME);
-    m_db.setUserName(DATABASE_USERNAME);
-    m_db.setPassword(DATABASE_PASSWORD);
+    m_db.setHostName(settings.value("HostName").toString());
+    m_db.setPort(settings.value("Port").toInt());
+    m_db.setDatabaseName(settings.value("DatabaseName").toString());
+    m_db.setUserName(settings.value("DatabaseUsername").toString());
+    m_db.setPassword(settings.value("DatababsePassword").toString());
 
     if (open()) {
         qDebug() << "connection with database established";

@@ -51,9 +51,5 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-DEFINES += DATABASE_PASSWORD=\\\"Adwxsqezc14\\\"\
-           DATABASE_HOSTNAME=\\\"localhost\\\"\
-           DATABASE_NAME=\\\"pocker\\\"\
-           DATABASE_USERNAME=\\\"postgres\\\"\
 
 
