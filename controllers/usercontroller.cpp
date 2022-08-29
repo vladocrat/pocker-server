@@ -23,6 +23,12 @@ bool UserController::addRoom(Room* room)
         return false;
     }
 
+    connect(this, &UserController::userLeft, [lobby] () {
+        for (auto& user : lobby->users()) {
+            user->send(Protocol::Server::SV_ROOM_UPDATED, Lobby::serialise(static_cast<Room>(*lobby)));
+        }
+    });
+
     m_lobbies.append(lobby);
 
     return true;
@@ -41,11 +47,11 @@ void UserController::addUser(User* user)
             while (userIt != users.end()) {
                 if (*userIt == user) {
                     users.erase(userIt);
+                    emit userLeft(*userIt);
+                    break;
                 }
             }
         }
-
-        m_users.removeOne(user);
     });
 }
 
